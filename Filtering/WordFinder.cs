@@ -15,6 +15,10 @@ public class WordFinder
 
         if (!matrix.Any())
             throw new ArgumentException("Matrix cannot be empty");
+        // Validar que todas las filas tengan la misma longitud
+        var firstRowLength = matrix.First().Length;
+        if (matrix.Any(row => row.Length != firstRowLength))
+            throw new ArgumentException("All matrix rows must have the same length");
 
         _matrix = matrix;
     }
@@ -28,7 +32,14 @@ public class WordFinder
         // TODO: Use HashSet for O(1) lookups
         // TODO: Count frequency in stream (each word only once per stream)
         // TODO: Return top 10 by frequency
+
+        if (wordStream == null)
+            throw new ArgumentException("Wordstream cannot be null", nameof(wordStream));
+
+
         return Enumerable.Empty<string>();
+
+
 
     }
 
