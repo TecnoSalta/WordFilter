@@ -84,3 +84,38 @@ Criterios de Éxito
 [] Precisión: Ranking correcto del top 10 por frecuencia real del stream
 
 [] Robustez: Manejo adecuado de casos edge (matriz vacía, stream vacío, etc.)
+
+
+---
+
+BenchmarkDotNet v0.15.4, Windows 11 (10.0.22631.5909/23H2/2023Update/SunValley3)
+12th Gen Intel Core i7-12700H 2.30GHz, 1 CPU, 20 logical and 14 physical cores
+.NET SDK 9.0.305
+  [Host]     : .NET 8.0.20 (8.0.20, 8.0.2025.41914), X64 RyuJIT x86-64-v3 [AttachedDebugger]
+  DefaultJob : .NET 8.0.20 (8.0.20, 8.0.2025.41914), X64 RyuJIT x86-64-v3
+
+
+| Method                | Mean      | Error     | StdDev    | Gen0   | Gen1   | Allocated |
+|---------------------- |----------:|----------:|----------:|-------:|-------:|----------:|
+| ExtractAllWords_32x32 |  6.327 us | 0.1236 us | 0.1733 us | 1.7776 | 0.0534 |   21.8 KB |
+| ExtractAllWords_64x64 | 17.986 us | 0.2426 us | 0.1894 us | 5.6458 | 0.4578 |   69.2 KB |
+
+Análisis de Rendimiento - Extracción de Palabras en Matriz
+
+Resultados del Benchmark:
+
+Matriz 32x32: 6.327 μs y 21.8 KB de memoria asignada
+
+Matriz 64x64: 17.986 μs y 69.2 KB de memoria asignada
+
+Completo el análisis:
+
+La velocidad de carga para las palabras extraídas horizontal y vertical es O(R*C) siendo R y C las filas y columnas de la matriz respectivamente. Ocupa poco espacio en memoria adicional porque utiliza un algoritmo eficiente que procesa cada celda una sola vez y almacena únicamente las palabras válidas encontradas, sin necesidad de estructuras de datos auxiliares complejas.
+
+Relación de escalado:
+
+Tiempo: Al duplicar las dimensiones (de 32x32 a 64x64), el tiempo aumenta aproximadamente 2.8x, lo que se aproxima al crecimiento cuadrático esperado O(n²) para una matriz
+
+Memoria: La memoria asignada aumenta 3.17x, consistente con el crecimiento del área de la matriz (de 1024 a 4096 celdas)
+
+Continuación: Ahora toca implementar la función Find

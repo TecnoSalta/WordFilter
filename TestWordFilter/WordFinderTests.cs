@@ -90,10 +90,10 @@ public class WordFinderTests
         var result = finder.Find(wordStream).ToList();
 
         // Assert
-        // Both should appear only once in results,
-        // but def should come first if we sort by frequency
+        // 'def' is most frequent, so it should be first.
         Assert.Equal(2, result.Count);
-        // The order will depend on implementation (top 10 by frequency)
+        Assert.Equal("def", result[0]);
+        Assert.Equal("abc", result[1]);
     }
 
     //Test 5: Handle duplicates in matrix (find only once)
@@ -214,7 +214,7 @@ public class WordFinderTests
     public void Find_WordsOrderedByFrequencyDescending()
     {
         // Arrange
-        var matrix = new[] { "a", "b", "c", "d" };
+        var matrix = new[] { "c", "b", "a", "d" }; // Reordered to break coincidental pass
         var wordStream = new[] { "a", "a", "a", "b", "b", "c", "d" }; // a:3, b:2, c:1, d:1
         var finder = new WordFinder(matrix);
 
@@ -222,8 +222,11 @@ public class WordFinderTests
         var result = finder.Find(wordStream).ToList();
 
         // Assert
-        Assert.Equal("a", result[0]);
-        Assert.Equal("b", result[1]);
-        // c and d order might vary since they have same frequency
+        Assert.Equal(4, result.Count); // Ensure all words are found
+        Assert.Equal("a", result[0]); // 'a' should be first (most frequent)
+        Assert.Equal("b", result[1]); // 'b' should be second
+        // c and d order can vary, so just check for presence
+        Assert.Contains("c", result.GetRange(2, 2));
+        Assert.Contains("d", result.GetRange(2, 2));
     }
 }
