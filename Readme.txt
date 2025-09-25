@@ -1,69 +1,74 @@
 Program: WordFinder
-Objetivo
-Implementar una clase WordFinder 
-que identifique las 10 palabras más frecuentes
- de un flujo de datos que están presentes en una matriz de caracteres,
- considerando apariciones (1) horizontales y (2) verticales
+Objective
+Implement a WordFinder class that identifies the 10 most frequent words from a data stream that are present in a character matrix, considering (1) horizontal and (2) vertical occurrences.
 
-Restricciones:
-Entradas
-Matriz:64×64 chars max. as IEnumerable<string>
-WordStream: Datos<string> quizas grande de palabras a buscar en la matriz.
+Constraints:
+Inputs
+Matrix: 64×64 chars max as IEnumerable<string>
 
-Definiciones:
-Find: Las palabras se deben buscar l->r y t->b.
-Conteo:
-CONTAR = Verificar Existencia + Acumular Frecuencia
-Paso 1: Verificar Existencia (¿La palabra está en la matriz?)
- Una palabra "existe" si aparece al menos una vez en la matriz (horizontal o vertical)
- No importa si aparece múltiples veces/orientaciones → cuenta como 1 existencia
-Resultado binario: Existe/ No existe
+WordStream: Potentially large IEnumerable<string> of words to search in the matrix.
 
-Paso 2: Acumular Frecuencia (¿Cuántas veces aparece en el stream?)
-Por cada aparición en el stream donde la palabra existe → +1 al contador
+Definitions:
+Find: Words must be searched left-to-right and top-to-bottom.
+Counting Process:
+COUNT = Verify Existence + Accumulate Frequency
 
-Stream con duplicados: Cada aparición única incrementa la frecuencia
+Step 1: Verify Existence (Is the word in the matrix?)
 
-Ranking final: Se ordena por este contador de frecuencia
+A word "exists" if it appears at least once in the matrix (horizontal or vertical)
 
+Multiple occurrences/orientations don't matter → counts as 1 existence
 
+Binary result: Exists/Does not exist
 
-Conteo de Frecuencia Idea 2:
-a.Contar cada aparición en wordstream para determinar "most repeated words"
-b.Si una palabra existe múltiples veces en la matriz,
- cuenta como una sola existencia.
+Step 2: Accumulate Frequency (How many times does it appear in the stream?)
 
-Resultado: Top 10 palabras por frecuencia de aparición en el stream
+For each occurrence in the stream where the word exists → +1 to counter
 
-Caso vacío: Retornar colección vacía si no hay coincidencias
+Stream with duplicates: Each unique appearance increments frequency
 
-⚡ Requisitos de Performance
-Alta eficiencia para flujos de palabras grandes
+Final ranking: Ordered by this frequency counter
 
-Optimización en uso de recursos del sistema
+Frequency Counting Concept:
+a. Count each appearance in wordstream to determine "most repeated words"
+b. If a word exists multiple times in the matrix, it counts as single existence.
 
-Algoritmo eficiente considerando el tamaño limitado de la matriz (64×64)
+Result: Top 10 words by frequency of appearance in the stream
 
-🔍 Reglas de Búsqueda
-Existencia en Matriz
+Empty case: Return empty collection if no matches
+
+⚡ Performance Requirements
+High efficiency for large word streams
+
+Optimized system resource usage
+
+Efficient algorithm considering limited matrix size (64×64)
+
+🔍 Search Rules
+Existence in Matrix
+Example Matrix:
+
 text
-Matriz Ejemplo:
 c o l d
 w i n d  
 h o t x
+"cold" → ✓ (horizontal, row 1)
 
-"cold" → ✓ (horizontal, fila 1)
-"wind" → ✓ (horizontal, fila 2) 
-"down" → ✗ (no encontrada)
-Conteo de Frecuencias
-text
+"wind" → ✓ (horizontal, row 2)
+
+"down" → ✗ (not found)
+
+Frequency Counting
 WordStream: ["cold", "cold", "wind", "hot", "cold", "heat"]
 
-Frecuencias:
-- "cold" → 3 (aparece 3 veces en stream, existe en matriz)
-- "wind" → 1 (aparece 1 vez en stream, existe en matriz)  
-- "hot" → 1 (aparece 1 vez en stream, existe en matriz)
-- "heat" → 0 (no existe en matriz)
+Frequencies:
 
-Resultado: ["cold", "wind", "hot"]
+"cold" → 3 (appears 3 times in stream, exists in matrix)
 
+"wind" → 1 (appears 1 time in stream, exists in matrix)
+
+"hot" → 1 (appears 1 time in stream, exists in matrix)
+
+"heat" → 0 (does not exist in matrix)
+
+Result: ["cold", "wind", "hot"]
