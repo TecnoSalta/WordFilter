@@ -1,4 +1,4 @@
-using Counter.Strategies;
+﻿using Counter.Strategies;
 using System.Collections;
 using System.Text;
 
@@ -16,13 +16,23 @@ public class WordFinder
     {
         ValidateMatrix(matrix);
 
-        _rows = matrix.Count();
-        _cols = matrix.First().Length;
+        var matrixList = matrix as IList<string> ?? matrix.ToList();
+
+        _rows = matrixList.Count;
+
+        _cols = _rows > 0 ? matrixList[0].Length : 0;
 
         _charMatrix = new char[_rows, _cols];
-        InitializeMatrix(matrix);
 
-        _matrixWords = ExtractCompleteWordsFromMatrix();
+        if (_rows > 0)
+        {
+            InitializeMatrix(matrixList);
+            _matrixWords = ExtractCompleteWordsFromMatrix();
+        }
+        else
+        {
+            _matrixWords = new HashSet<string>(); // Matriz vacía = palabras vacías
+        }
         _findStrategy = findStrategy ?? new OptimizedFindStrategy();
     }
 
@@ -47,6 +57,10 @@ public class WordFinder
 
     public IEnumerable Find(IEnumerable wordStream)
     {
+        bool isEmpty = _charMatrix.GetLength(0) == 0 && _charMatrix.GetLength(1) == 0;
+        if (isEmpty || _matrixWords.Count == 0)
+            return Enumerable.Empty<string>();
+
         if (wordStream == null)
             return Enumerable.Empty<string>();
 
@@ -55,11 +69,12 @@ public class WordFinder
 
     private static void ValidateMatrix(IEnumerable<string> matrix)
     {
-        if (matrix == null || !matrix.Any())
-            throw new ArgumentException("Matrix cannot be null or empty");
+        if (matrix == null)
+            throw new ArgumentException("Matrix cannot be null");
 
+        var cols = 0;
         var rows = matrix.Count();
-        var cols = matrix.First().Length;
+        if (rows != 0) cols = matrix.First().Length; 
 
         if (rows > 64 || cols > 64)
             throw new ArgumentException("Matrix dimensions cannot exceed 64x64");
@@ -70,7 +85,6 @@ public class WordFinder
         if (matrix.Any(row => row == null))
             throw new ArgumentException("Matrix rows cannot be null");
     }
-
     private void InitializeMatrix(IEnumerable<string> matrix)
     {
         int rowIndex = 0;

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Counter.Strategies;
 
 public class SpaceSavingFindStrategy : IFindStrategy
