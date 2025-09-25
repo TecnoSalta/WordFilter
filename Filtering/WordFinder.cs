@@ -1,8 +1,8 @@
+using Counter.Strategies;
 using System.Collections;
+using System.Text;
 
 namespace Counter;
-
-
 
 public class WordFinder
 {
@@ -88,10 +88,8 @@ public class WordFinder
     {
         var words = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // Extraer palabras completas horizontales
         ExtractHorizontalWords(words);
 
-        // Extraer palabras completas verticales  
         ExtractVerticalWords(words);
 
         return words;
@@ -101,13 +99,15 @@ public class WordFinder
     {
         for (int i = 0; i < _rows; i++)
         {
-            // Construir cada fila como una palabra completa
-            var horizontalWord = new char[_cols];
-            for (int j = 0; j < _cols; j++)
+            for (int start = 0; start < _cols; start++)
             {
-                horizontalWord[j] = _charMatrix[i, j];
+                var sb = new StringBuilder();
+                for (int j = start; j < _cols; j++)
+                {
+                    sb.Append(_charMatrix[i, j]);
+                    words.Add(sb.ToString()); 
+                }
             }
-            words.Add(new string(horizontalWord));
         }
     }
 
@@ -115,13 +115,16 @@ public class WordFinder
     {
         for (int j = 0; j < _cols; j++)
         {
-            // Construir cada columna como una palabra completa
-            var verticalWord = new char[_rows];
-            for (int i = 0; i < _rows; i++)
+            // Extraer TODOS los substrings de cada columna
+            for (int start = 0; start < _rows; start++)
             {
-                verticalWord[i] = _charMatrix[i, j];
+                var sb = new StringBuilder();
+                for (int i = start; i < _rows; i++)
+                {
+                    sb.Append(_charMatrix[i, j]);
+                    words.Add(sb.ToString()); // Agregar cada substring
+                }
             }
-            words.Add(new string(verticalWord));
         }
     }
 

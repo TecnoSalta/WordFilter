@@ -1,7 +1,6 @@
 using Counter;
-using Xunit;
+using Counter.Strategies;
 using System.Collections;
-using System.Linq;
 
 public class WordFinderTests
 {
@@ -270,7 +269,25 @@ public class WordFinderTests
         // Assert
         Assert.Equal(3, result.Count);
         Assert.Equal("cold", result[0]);
-        // The order of "wind" and "hot" can vary as they have the same frequency.
+        Assert.Contains("wind", result);
+        Assert.Contains("hot", result);
+        Assert.DoesNotContain("heat", result);
+    }
+
+    [Fact]
+    public void SimpleFind_ExampleFromReadme_ReturnsCorrectResult()
+    {
+        // Arrange
+        var matrix = new[] { "cold", "wind", "hotx" };
+        var wordStream = new[] { "cold", "cold", "wind", "hot", "cold", "heat" };
+        var finder = new WordFinder((IEnumerable)matrix);
+        finder.SetStrategy(new SimpleFindStrategy());
+        // Act
+        var result = finder.Find((IEnumerable)wordStream).Cast<string>().ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("cold", result[0]);
         Assert.Contains("wind", result);
         Assert.Contains("hot", result);
         Assert.DoesNotContain("heat", result);

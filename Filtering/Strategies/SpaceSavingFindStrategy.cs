@@ -1,11 +1,15 @@
-namespace Counter;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public class SimpleFindStrategy : IFindStrategy
+namespace Counter.Strategies;
+
+public class SpaceSavingFindStrategy : IFindStrategy
 {
     public IEnumerable<string> Find(IEnumerable<string> wordStream, HashSet<string> wordsInMatrix)
     {
         if (wordStream == null)
-            return Enumerable.Empty<string>();
+            return [];
 
         return wordStream
             .Where(word => !string.IsNullOrEmpty(word) && wordsInMatrix.Contains(word))

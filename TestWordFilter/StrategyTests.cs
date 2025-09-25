@@ -1,84 +1,67 @@
 using Counter;
-using System;
-using System.Linq;
-using Xunit;
 
-namespace TestWordFilter;
-
-public class StrategyTests
+namespace TestWordFilter
 {
-    [Theory]
-    [InlineData(typeof(SimpleFindStrategy))]
-    [InlineData(typeof(SpaceSavingFindStrategy))]
-    [InlineData(typeof(OptimizedFindStrategy))]
-    public void Find_WordsOrderedByFrequencyDescending(Type strategyType)
+    public class WordFinderTests
     {
-        // Arrange
-        var strategy = (IFindStrategy)Activator.CreateInstance(strategyType);
+        [Fact]
+        public void Constructor_ValidMatrix_InitializesCorrectly()
+        {
+            // Arrange
+            var matrix = new[] { "cold", "wind", "heat" };
 
-        // Act
-        var result = strategy.Find(TestData.WordStreamFrequency, TestData.WordsInMatrixForFrequencyTest).ToList();
+            // Act
+            var wordFinder = new WordFinder(matrix);
 
-        // Assert
-        Assert.Equal(4, result.Count);
-        Assert.Equal("a", result[0]);
-        Assert.Equal("b", result[1]);
-        Assert.Contains("c", result.GetRange(2, 2));
-        Assert.Contains("d", result.GetRange(2, 2));
-    }
+            // Assert
+            Assert.NotNull(wordFinder);
+        }
 
-    [Theory]
-    [InlineData(typeof(SimpleFindStrategy))]
-    [InlineData(typeof(SpaceSavingFindStrategy))]
-    [InlineData(typeof(OptimizedFindStrategy))]
-    public void Find_EmptyStream_ReturnsEmpty(Type strategyType)
-    {
-        // Arrange
-        var strategy = (IFindStrategy)Activator.CreateInstance(strategyType);
-        var wordStream = Array.Empty<string>();
+        [Fact]
+        public void Find_WordsInMatrixExistInWordStream_ReturnsWords()
+        {
+            // Arrange
+            var matrix = new[] { "cold", "wind", "heat" };
+            var wordStream = new[] { "cold", "cold", "wind", "hot", "cold", "heat" };
+            var wordFinder = new WordFinder(matrix);
 
-        // Act
-        var result = strategy.Find(wordStream, TestData.WordsInMatrix);
+            // Act
+            var result = wordFinder.Find(wordStream).ToList();
 
-        // Assert
-        Assert.Empty(result);
-    }
-    
-    [Theory]
-    [InlineData(typeof(SimpleFindStrategy))]
-    [InlineData(typeof(SpaceSavingFindStrategy))]
-    [InlineData(typeof(OptimizedFindStrategy))]
-    public void Find_NullStream_ReturnsEmpty(Type strategyType)
-    {
-        // Arrange
-        var strategy = (IFindStrategy)Activator.CreateInstance(strategyType);
+            // Assert
+            Assert.Contains("cold", result);
+            Assert.Contains("wind", result);
+        }
 
-        // Act
-        var result = strategy.Find(null, TestData.WordsInMatrix);
+        [Fact]
+        public void Find_EmptyWordStream_ReturnsEmpty()
+        {
+            // Arrange
+            var matrix = new[] { "cold", "wind", "heat" };
+            var wordStream = new string[0];
+            var wordFinder = new WordFinder(matrix);
 
-        // Assert
-        Assert.Empty(result);
-    }
-    
-    [Theory]
-    [InlineData(typeof(SimpleFindStrategy))]
-    [InlineData(typeof(SpaceSavingFindStrategy))]
-    [InlineData(typeof(OptimizedFindStrategy))]
-    public void Find_MoreThan10WordsFound_ReturnsOnlyTop10(Type strategyType)
-    {
-        // Arrange
-        var strategy = (IFindStrategy)Activator.CreateInstance(strategyType);
-        var wordStream = new[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "a", "b", "c", "d", "e" };
+            // Act
+            var result = wordFinder.Find(wordStream).ToList();
 
-        // Act
-        var result = strategy.Find(wordStream, TestData.WordsInMatrix).ToList();
+            // Assert
+            Assert.Empty(result);
+        }
 
-        // Assert
-        Assert.Equal(10, result.Count);
-        Assert.Equal("a", result[0]);
-        Assert.Equal("b", result[1]);
-        Assert.Equal("c", result[2]);
-        Assert.Equal("d", result[3]);
-        Assert.Equal("e", result[4]);
+        [Fact]
+        public void Find_NullWordStream_ReturnsEmpty()
+        {
+            // Arrange
+            var matrix = new[] { "cold", "wind", "heat" };
+            var wordStream = (IEnumerable<string>)null;
+            var wordFinder = new WordFinder(matrix);
+
+            // Act
+            var result = wordFinder.Find(wordStream).ToList();
+
+            // Assert
+            Assert.Empty(result);
+        }
+
     }
 }

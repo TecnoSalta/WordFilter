@@ -1,4 +1,4 @@
-namespace Counter;
+namespace Counter.Strategies;
 
 public interface IFindStrategy
 {

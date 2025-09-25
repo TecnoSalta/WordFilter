@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Counter;
+namespace Counter.Strategies;
 
 public class OptimizedFindStrategy : IFindStrategy
 {
