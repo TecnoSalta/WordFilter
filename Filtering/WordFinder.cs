@@ -1,75 +1,99 @@
-﻿using System.Text;
+using System.Collections;
 
 namespace Counter;
+
+
 
 public class WordFinder
 {
     private readonly char[,] _charMatrix;
     private readonly int _rows;
     private readonly int _cols;
-    private readonly HashSet<string> _wordsInMatrix;
+    private readonly HashSet<string> _matrixWords;
+    private IFindStrategy _findStrategy;
 
-    public WordFinder(IEnumerable<string> matrix)
+    public WordFinder(IEnumerable<string> matrix, IFindStrategy? findStrategy = null)
     {
-        if (matrix == null || !matrix.Any())
-            throw new ArgumentException("Matrix cannot be null or empty");
+        ValidateMatrix(matrix);
 
         _rows = matrix.Count();
         _cols = matrix.First().Length;
 
-        if (_rows > 64 || _cols > 64)
-            throw new ArgumentException("Matrix dimensions cannot exceed 64x64");
-
-        if (matrix.Any(row => row.Length != _cols))
-            throw new ArgumentException("All matrix rows must have the same length");
-
         _charMatrix = new char[_rows, _cols];
-        int currentRow = 0;
-        foreach (var row in matrix)
-        {
-            for (int i = 0; i < row.Length; i++)
-            {
-                _charMatrix[currentRow, i] = row[i];
-            }
-            currentRow++;
-        }
+        InitializeMatrix(matrix);
 
-        _wordsInMatrix = ExtractAllWordsFromMatrix();
+        _matrixWords = ExtractCompleteWordsFromMatrix();
+        _findStrategy = findStrategy ?? new OptimizedFindStrategy();
+    }
+
+    public WordFinder(IEnumerable matrix)
+        : this(matrix?.Cast<string>() ?? throw new ArgumentException("Matrix cannot be null"),
+              new OptimizedFindStrategy())
+    {
+    }
+
+    public void SetStrategy(IFindStrategy findStrategy)
+    {
+        _findStrategy = findStrategy ?? throw new ArgumentNullException(nameof(findStrategy));
     }
 
     public IEnumerable<string> Find(IEnumerable<string> wordStream)
     {
-        // TODO: Extract all possible words from matrix (horizontal + vertical)
-        // TODO: Use HashSet for O(1) lookups
-        // TODO: Count frequency in stream (each word only once per stream)
-        // TODO: Return top 10 by frequency
-
         if (wordStream == null)
-            throw new ArgumentException("Wordstream cannot be null", nameof(wordStream));
+            return [];
 
-        if (!wordStream.Any())
-            return Enumerable.Empty<string>();
-
-        var foundWords = _wordsInMatrix.Intersect(wordStream);
-        if (!foundWords.Any())
-            return Enumerable.Empty<string>();
-
-        var frequency = new Dictionary<string, int>();
-        foreach (var word in foundWords)
-        {
-            frequency[word] = 1;
-        }
-
-        return frequency.OrderByDescending(kvp => kvp.Value)
-                        .Take(10)
-                        .Select(kvp => kvp.Key);
+        return _findStrategy.Find(wordStream, _matrixWords);
     }
 
-    private HashSet<string> ExtractAllWordsFromMatrix()
+    public IEnumerable Find(IEnumerable wordStream)
     {
-        var words = new HashSet<string>();
+        if (wordStream == null)
+            return Enumerable.Empty<string>();
+
+        return Find(wordStream.Cast<string>());
+    }
+
+    private static void ValidateMatrix(IEnumerable<string> matrix)
+    {
+        if (matrix == null || !matrix.Any())
+            throw new ArgumentException("Matrix cannot be null or empty");
+
+        var rows = matrix.Count();
+        var cols = matrix.First().Length;
+
+        if (rows > 64 || cols > 64)
+            throw new ArgumentException("Matrix dimensions cannot exceed 64x64");
+
+        if (matrix.Any(row => row?.Length != cols))
+            throw new ArgumentException("All matrix rows must have the same length");
+
+        if (matrix.Any(row => row == null))
+            throw new ArgumentException("Matrix rows cannot be null");
+    }
+
+    private void InitializeMatrix(IEnumerable<string> matrix)
+    {
+        int rowIndex = 0;
+        foreach (var row in matrix)
+        {
+            for (int colIndex = 0; colIndex < row.Length; colIndex++)
+            {
+                _charMatrix[rowIndex, colIndex] = char.ToUpperInvariant(row[colIndex]);
+            }
+            rowIndex++;
+        }
+    }
+
+    private HashSet<string> ExtractCompleteWordsFromMatrix()
+    {
+        var words = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Extraer palabras completas horizontales
         ExtractHorizontalWords(words);
+
+        // Extraer palabras completas verticales  
         ExtractVerticalWords(words);
+
         return words;
     }
 
@@ -77,12 +101,13 @@ public class WordFinder
     {
         for (int i = 0; i < _rows; i++)
         {
-            var sb = new StringBuilder();
+            // Construir cada fila como una palabra completa
+            var horizontalWord = new char[_cols];
             for (int j = 0; j < _cols; j++)
             {
-                sb.Append(_charMatrix[i, j]);
+                horizontalWord[j] = _charMatrix[i, j];
             }
-            words.Add(sb.ToString());
+            words.Add(new string(horizontalWord));
         }
     }
 
@@ -90,19 +115,31 @@ public class WordFinder
     {
         for (int j = 0; j < _cols; j++)
         {
-            var sb = new StringBuilder();
+            // Construir cada columna como una palabra completa
+            var verticalWord = new char[_rows];
             for (int i = 0; i < _rows; i++)
             {
-                sb.Append(_charMatrix[i, j]);
+                verticalWord[i] = _charMatrix[i, j];
             }
-            words.Add(sb.ToString());
+            words.Add(new string(verticalWord));
         }
     }
 
+    public void PrintMatrixWords()
+    {
+        Console.WriteLine("Palabras encontradas en la matriz:");
+        foreach (var word in _matrixWords.OrderBy(w => w))
+        {
+            Console.WriteLine($"- {word}");
+        }
+    }
+    //NO BORRAR es para Benchmark
     public void BenchmarkExtraction()
     {
         var words = new HashSet<string>();
-        ExtractHorizontalWords(words);   
-        ExtractVerticalWords(words);    
+        ExtractHorizontalWords(words);
+        ExtractVerticalWords(words);
     }
+
+
 }
